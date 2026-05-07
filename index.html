@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt — Vídeo Egípcio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --gold-dim: #7a5f20;
+    --bg: #080604;
+    --bg2: #100d06;
+    --sand: #e8d5a3;
+    --stone: #2a2010;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--sand);
+    font-family: 'EB Garamond', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── partículas de fundo ── */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* ── header ── */
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(22px, 5vw, 42px);
+    font-weight: 900;
+    text-align: center;
+    color: var(--gold);
+    text-shadow: 0 0 40px #c9a84c55, 0 2px 0 #000;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 15px;
+    color: #7a6840;
+    font-style: italic;
+    margin-bottom: 50px;
+  }
+
+  /* ── divisor ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 36px 0 28px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .divider span {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  /* ── cenas ── */
+  .scene-grid {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .scene-card {
+    background: linear-gradient(135deg, #12100808, #1e180a);
+    border: 1px solid #c9a84c22;
+    border-radius: 4px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .scene-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--gold), transparent);
+  }
+  .scene-card:hover {
+    border-color: #c9a84c55;
+    box-shadow: 0 0 20px #c9a84c18;
+  }
+
+  .scene-num {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 6px;
+  }
+
+  .scene-title {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gold-light);
+    margin-bottom: 10px;
+  }
+
+  .scene-time {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--gold-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .scene-text {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #c8b890;
+  }
+
+  .scene-text em {
+    color: var(--gold-light);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ── bloco do prompt completo ── */
+  .prompt-block {
+    background: #0c0a05;
+    border: 1px solid #c9a84c33;
+    border-radius: 4px;
+    padding: 28px 28px 24px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .prompt-block h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+  }
+
+  .prompt-text {
+    font-size: 14.5px;
+    line-height: 1.85;
+    color: #d0c090;
+    white-space: pre-wrap;
+    font-family: 'EB Garamond', serif;
+  }
+
+  /* ── botão copiar ── */
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    padding: 12px 32px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: linear-gradient(135deg, var(--gold), #a07830);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px #c9a84c44;
+  }
+  .copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 30px #c9a84c66;
+  }
+  .copy-btn.copied {
+    background: linear-gradient(135deg, #2a7a2a, #1a5a1a);
+    color: #90ff90;
+    box-shadow: 0 0 20px #2a7a2a44;
+  }
+
+  /* ── dicas ── */
+  .tips {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .tip-card {
+    background: #0f0c06;
+    border: 1px solid #c9a84c1a;
+    border-radius: 4px;
+    padding: 16px;
+  }
+  .tip-icon { font-size: 20px; margin-bottom: 8px; }
+  .tip-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 6px;
+  }
+  .tip-text { font-size: 13px; color: #8a7850; line-height: 1.5; }
+
+  /* ── footer ── */
+  .footer {
+    margin-top: 60px;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #3a2e14;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="wrap">
+
+  <p class="eyebrow">⟁ Gemini AI · Video Generation Prompt</p>
+  <h1>Vídeo do Evento<br>Egípcio</h1>
+  <p class="subtitle">Prompt cinematográfico · 2 minutos · Tour + Trailer + Épico</p>
+
+  <!-- CENAS -->
+  <div class="divider"><span>Estrutura de Cenas</span></div>
+
+  <div class="scene-grid">
+
+    <div class="scene-card">
+      <div class="scene-num">Cena 01</div>
+      <div class="scene-title">Abertura épica — Vista aérea do deserto</div>
+      <div class="scene-time">0:00 – 0:15</div>
+      <p class="scene-text">Câmera começa <em>muito alta</em>, acima de nuvens douradas ao pôr do sol. Mergulha em velocidade épica em direção ao deserto. Areia voa. Revela um salão decorado com tema egípcio — corredores com hieróglifos nas paredes, tochas acesas, obeliscos na entrada.</p>
+    </div>
+
+    <div class="scene-card">
+      <div class="scene-num">Cena 02</div>
+      <div class="scene-title">Entrada pelo corredor — Tour de primeiro pessoa</div>
+      <div class="scene-time">0:15 – 0:35</div>
+      <p class="scene-text">Câmera entra pelo corredor largo decorado com <em>pinturas egípcias nas paredes</em>, padrões de ouro e lápis-lazúli, tochas crepitando. O chão tem areia. Ao fundo, uma luz dourada pulsa — a pirâmide se revela lentamente no final do corredor.</p>
+    </div>
+
+    <div class="scene-card">
+      <div class="scene-num">Cena 03</div>
+      <div class="scene-title">Reveal da Pirâmide — Momento épico</div>
+      <div class="scene-time">0:35 – 0:50</div>
+      <p class="scene-text">Câmera sai do corredor e a cena <em>abre dramaticamente</em>. No centro, uma grande pirâmide construída de caixas douradas. Em volta, um <em>canal circular de água azul</em> — o Rio Nilo. Quatro estandes nos cantos em forma de X. Câmera gira lentamente em órbita ao redor da pirâmide.</p>
+    </div>
+
+    <div class="scene-card">
+      <div class="scene-num">Cena 04</div>
+      <div class="scene-title">Tour pelos estandes — Close dramático</div>
+      <div class="scene-time">0:50 – 1:20</div>
+      <p class="scene-text">Câmera voa de estande em estande com <em>cortes cinematográficos</em>:<br>
+      · <em>Tumba</em> — sarcófago dourado com vasos canópicos, tochas, mistério<br>
+      · <em>Pirâmide</em> — mini pirâmide, papiros com hieróglifos, olho de Hórus<br>
+      · <em>Mesa</em> — comidas típicas, pão, vasos de barro, uvas, ambientação<br>
+      · <em>Faraó</em> — estátua majestosa sentada no trono, cajado e mangual</p>
+    </div>
+
+    <div class="scene-card">
+      <div class="scene-num">Cena 05</div>
+      <div class="scene-title">Plano aéreo completo — Visão da rotatória</div>
+      <div class="scene-time">1:20 – 1:40</div>
+      <p class="scene-text">Câmera sobe lentamente, revelando <em>toda a rotatória</em> vista de cima. O Nilo brilha ao redor da pirâmide. As pessoas caminham em sentido anti-horário pelos estandes. Luz dourada inunda a cena. Partículas de areia flutuam no ar.</p>
+    </div>
+
+    <div class="scene-card">
+      <div class="scene-num">Cena 06</div>
+      <div class="scene-title">Encerramento épico — Logo do evento</div>
+      <div class="scene-time">1:40 – 2:00</div>
+      <p class="scene-text">Câmera recua lentamente enquanto <em>faíscas douradas</em> explodem da ponta da pirâmide. O sol se põe atrás da estrutura. Fade com título do evento aparecendo em hieróglifos que se transformam em texto moderno. Música épica cresce até silêncio.</p>
+    </div>
+
+  </div>
+
+  <!-- PROMPT COMPLETO -->
+  <div class="divider"><span>Prompt Completo para o Gemini</span></div>
+
+  <div class="prompt-block">
+    <h2>📋 Copie e cole no Gemini Video</h2>
+    <div class="prompt-text" id="prompt-content">Generate a 2-minute cinematic video with epic, trailer-style editing mixed with an immersive first-person tour. The setting is an Egyptian-themed event hall built by students.
+
+VISUAL STYLE: Cinematic 4K, warm golden lighting, dramatic shadows, sand particles floating in air, torch flames flickering. Color palette: deep golds, sandy beiges, lapis lazuli blues, deep blacks. Camera movements are smooth and epic — sweeping crane shots, slow orbit rotations, and immersive first-person walking.
+
+SCENE 1 — EPIC OPENING [0:00–0:15]:
+Start with an extreme aerial view above golden sunset clouds. Camera dives at high speed toward a decorated hall in the middle of a desert setting. Sand flies dramatically. Reveal the entrance: two tall obelisks flanking a wide corridor decorated with Egyptian paintings and hieroglyphs on the walls. Torches burn on both sides. Epic orchestral music begins.
+
+SCENE 2 — CORRIDOR TOUR [0:15–0:35]:
+First-person camera walks slowly through a wide decorated corridor. Walls covered in colorful Egyptian murals — pharaohs, gods, hieroglyphic inscriptions in gold and blue. Sand on the floor. Torches crackle. At the end of the corridor, a warm golden light pulses. The silhouette of a massive pyramid slowly comes into view.
+
+SCENE 3 — PYRAMID REVEAL [0:35–0:50]:
+Camera exits the corridor. The scene opens dramatically wide. Center: a large pyramid built from stacked golden boxes, glowing under warm light. Surrounding it: a circular canal of shimmering blue water — the Nile River. Four exhibition stands arranged in an X pattern around the pyramid. Camera slowly orbits the pyramid in a majestic 180-degree arc. Music reaches a powerful crescendo.
+
+SCENE 4 — STAND TOUR [0:50–1:20]:
+Fast cinematic cuts between the four stands, each with a dramatic close-up:
+— STAND 1 (Tomb): A golden sarcophagus with canopic jars, torch light, mysterious shadows, Egyptian death mask detail.
+— STAND 2 (Pyramid Info): Mini golden pyramid, papyrus scrolls with hieroglyphs, Eye of Horus symbol glowing.
+— STAND 3 (Food Table): Ancient Egyptian foods — flatbread, clay pots, grapes, figs, ceramic bowls arranged beautifully.
+— STAND 4 (Pharaoh): Majestic pharaoh statue seated on throne, holding crook and flail, golden crown, cobra uraeus detail.
+
+SCENE 5 — AERIAL OVERVIEW [1:20–1:40]:
+Camera rises slowly from ground level to full aerial view. The entire rotunda is revealed — circular Nile canal glowing blue around the central pyramid, four stands in X formation, people walking counterclockwise. Golden dust particles float in rays of light. The scene feels ancient and majestic.
+
+SCENE 6 — EPIC CLOSING [1:40–2:00]:
+Camera slowly pulls back while golden sparks burst from the pyramid's apex like fireworks. The sun sets dramatically behind the pyramid, creating a perfect silhouette. Title text appears: first as hieroglyphs that transform into modern letters. Music builds to a powerful finish, then fades to silence. Final frame: the pyramid glowing gold against a deep orange sky.
+
+AUDIO: Epic orchestral soundtrack — strings, drums, and horn instruments. Dramatic buildup through scenes 1–3, intense energy in scene 4, majestic and wide in scene 5, emotional and grand finale in scene 6.
+
+QUALITY: Cinematic 4K, 24fps, film grain texture, anamorphic lens flares, depth of field, volumetric lighting, photorealistic rendering.</div>
+  </div>
+
+  <div style="text-align:center; margin-bottom: 40px;">
+    <button class="copy-btn" onclick="copyPrompt()" id="copy-btn">
+      <span>⟁</span> Copiar Prompt Completo
+    </button>
+  </div>
+
+  <!-- DICAS -->
+  <div class="divider"><span>Dicas para o Gemini</span></div>
+
+  <div class="tips">
+    <div class="tip-card">
+      <div class="tip-icon">🎬</div>
+      <div class="tip-label">Modelo</div>
+      <div class="tip-text">Use o <strong>Gemini 2.0 Flash</strong> ou acesse o <strong>VideoFX</strong> pelo Google Labs para melhor resultado.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">🔁</div>
+      <div class="tip-label">Gere cena por cena</div>
+      <div class="tip-text">Se não suportar 2 min, gere cada cena separada e junte no CapCut ou DaVinci Resolve.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">🌅</div>
+      <div class="tip-label">Estilo de referência</div>
+      <div class="tip-text">Mencione "like a National Geographic documentary meets a Hollywood epic trailer" para melhor resultado.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">🎵</div>
+      <div class="tip-label">Música</div>
+      <div class="tip-text">Adicione trilha épica no CapCut depois — tente "Two Steps from Hell — Archangel" ou "Hans Zimmer — Egyptian style".</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    ⟁ Evento Egípcio · Escola Adventista de Uberlândia · 2026 ⟁
+  </div>
+
+</div>
+
+<script>
+// ── partículas de fundo ──
+const bgCanvas = document.getElementById('bg-canvas');
+const ctx = bgCanvas.getContext('2d');
+let particles = [];
+
+function resizeBg() {
+  bgCanvas.width  = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+for (let i = 0; i < 80; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.5 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -Math.random() * 0.4 - 0.1,
+    o: Math.random() * 0.6 + 0.2,
+  });
+}
+
+function animBg() {
+  ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.y < -5) { p.y = bgCanvas.height + 5; p.x = Math.random() * bgCanvas.width; }
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(201,168,76,${p.o})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animBg);
+}
+animBg();
+
+// ── copiar prompt ──
+function copyPrompt() {
+  const text = document.getElementById('prompt-content').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>✓</span> Prompt Copiado!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span>⟁</span> Copiar Prompt Completo';
+    }, 3000);
+  });
+}
+</script>
+</body>
+</html>
