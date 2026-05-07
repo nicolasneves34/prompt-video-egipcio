@@ -241,13 +241,47 @@
   #bottom-bar span { color: #6b5a35; }
   #bottom-bar b { color: var(--gold); }
 
-  /* scrollbar */
-  #panel::-webkit-scrollbar { width: 4px; }
+  /* ── MARCA D'ÁGUA ── */
+  #watermark {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: #0d0a04cc;
+    border: 1px solid #c9a84c44;
+    border-radius: 3px;
+    padding: 6px 12px;
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+  #watermark span {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  #watermark small {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 11px;
+    color: var(--gold-light);
+    letter-spacing: 0.1em;
+  }
   #panel::-webkit-scrollbar-track { background: #0d0a04; }
   #panel::-webkit-scrollbar-thumb { background: #c9a84c44; border-radius: 2px; }
 </style>
 </head>
 <body>
+
+<!-- MARCA D'ÁGUA -->
+<div id="watermark">
+  <span>⟁ Feito por</span>
+  <small>Nicolas Neves</small>
+</div>
 
 <!-- HEADER -->
 <div id="header">
