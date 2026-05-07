@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquete Egípcia 3D</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@400;700&family=Lato:wght@300;400&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --sand: #e8d5a3;
+    --dark: #1a1208;
+    --stone: #8b7355;
+    --nile: #1a4a6b;
+    --accent: #d4380d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d0a04;
+    font-family: 'Lato', sans-serif;
+    color: #e8d5a3;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: linear-gradient(90deg, #0d0a04, #1a1208, #0d0a04);
+    border-bottom: 1px solid #c9a84c44;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+
+  #header h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 20px #c9a84c66;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .tab-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border: 1px solid #c9a84c44;
+    background: transparent;
+    color: #8b7355;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 2px;
+  }
+  .tab-btn.active {
+    background: #c9a84c22;
+    color: var(--gold);
+    border-color: var(--gold);
+    text-shadow: 0 0 10px #c9a84c88;
+  }
+  .tab-btn:hover:not(.active) { color: var(--sand); border-color: #c9a84c66; }
+
+  /* ── CAMERA TABS ── */
+  .cam-tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .cam-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    padding: 5px 12px;
+    border: 1px solid #c9a84c33;
+    background: transparent;
+    color: #6b5a35;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 2px;
+  }
+  .cam-btn.active {
+    background: #c9a84c18;
+    color: var(--gold-light);
+    border-color: #c9a84c88;
+  }
+  .cam-btn:hover:not(.active) { color: var(--sand); }
+
+  /* ── MAIN LAYOUT ── */
+  #main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── CANVAS ── */
+  #canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  canvas#scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── SIDE PANEL ── */
+  #panel {
+    width: 240px;
+    background: linear-gradient(180deg, #0d0a04, #12100a);
+    border-left: 1px solid #c9a84c33;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .panel-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid #c9a84c22;
+  }
+
+  .panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+
+  .slider-row {
+    margin-bottom: 10px;
+  }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #a09070;
+    margin-bottom: 4px;
+  }
+  .slider-val { color: var(--gold-light); font-weight: 600; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 3px;
+    background: #2a2010;
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    box-shadow: 0 0 6px #c9a84c88;
+  }
+
+  .ctrl-btn {
+    width: 100%;
+    padding: 7px;
+    margin-bottom: 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    border: 1px solid #c9a84c44;
+    background: transparent;
+    color: var(--sand);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+    text-align: center;
+  }
+  .ctrl-btn:hover { background: #c9a84c18; color: var(--gold); border-color: var(--gold); }
+  .ctrl-btn.active { background: #c9a84c28; color: var(--gold-light); border-color: var(--gold-light); }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 11px;
+    color: #a09070;
+  }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── TOOLTIP ── */
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #0d0a04ee;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--gold-light);
+    display: none;
+    z-index: 50;
+    max-width: 180px;
+    text-align: center;
+    box-shadow: 0 0 20px #c9a84c44;
+  }
+
+  /* ── BOTTOM BAR ── */
+  #bottom-bar {
+    height: 28px;
+    background: #0d0a04;
+    border-top: 1px solid #c9a84c22;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 20px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: #4a3f25;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.08em;
+  }
+  #bottom-bar span { color: #6b5a35; }
+  #bottom-bar b { color: var(--gold); }
+
+  /* scrollbar */
+  #panel::-webkit-scrollbar { width: 4px; }
+  #panel::-webkit-scrollbar-track { background: #0d0a04; }
+  #panel::-webkit-scrollbar-thumb { background: #c9a84c44; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <h1>⟁ Maquete Egípcia 3D</h1>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="setMode('colorful')">🎨 Maquete Colorida</button>
+    <button class="tab-btn" onclick="setMode('realistic')">🏺 Versão Realista</button>
+  </div>
+  <div class="cam-tabs">
+    <button class="cam-btn active" id="cam-orbit" onclick="setCam('orbit')">🔄 Livre</button>
+    <button class="cam-btn" id="cam-top" onclick="setCam('top')">⬆ Topo</button>
+    <button class="cam-btn" id="cam-walk" onclick="setCam('walk')">👁 Por Dentro</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="canvas-wrap">
+    <canvas id="scene"></canvas>
+    <div id="tooltip"></div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel">
+
+    <div class="panel-section">
+      <div class="panel-title">Pirâmide</div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span>Camadas</span>
+          <span class="slider-val" id="val-layers">8</span>
+        </div>
+        <input type="range" min="1" max="10" value="8" id="sl-layers" oninput="updatePyramid()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span>Largura caixa (cm)</span>
+          <span class="slider-val" id="val-bw">50</span>
+        </div>
+        <input type="range" min="20" max="70" value="50" id="sl-bw" oninput="updatePyramid()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span>Altura caixa (cm)</span>
+          <span class="slider-val" id="val-bh">40</span>
+        </div>
+        <input type="range" min="15" max="60" value="40" id="sl-bh" oninput="updatePyramid()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span>Profund. caixa (cm)</span>
+          <span class="slider-val" id="val-bd">50</span>
+        </div>
+        <input type="range" min="20" max="70" value="50" id="sl-bd" oninput="updatePyramid()">
+      </div>
+
+      <button class="ctrl-btn" id="btn-boxes" onclick="toggleBoxes()">📦 Mostrar como Caixas</button>
+      <button class="ctrl-btn active" id="btn-solid" onclick="toggleSolid()">🔺 Forma Sólida</button>
+      <button class="ctrl-btn" id="btn-explode" onclick="toggleExplode()">💥 Explodir Camadas</button>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Cena</div>
+      <button class="ctrl-btn" id="btn-rotate" onclick="toggleAutoRotate()">⟳ Auto-Rotação</button>
+      <button class="ctrl-btn" onclick="resetCamera()">↺ Reset Câmera</button>
+      <button class="ctrl-btn" id="btn-corridor" onclick="toggleCorridor()">🚪 Corredor Visível</button>
+      <button class="ctrl-btn" id="btn-labels" onclick="toggleLabels()">🏷 Etiquetas</button>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Legenda</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div>Pirâmide Central</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#8b2020"></div>Estande 1 — Tumba</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2a5a8b"></div>Estande 2 — Pirâmide Info</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2a7a3a"></div>Estande 3 — Mesa Explicativa</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7a3a8b"></div>Estande 4 — Faraó/Esfinge</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1a4a6b"></div>Rio Nilo (centro)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d4a844"></div>Areia (bordas)</div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Dimensões</div>
+      <div style="font-size:11px; color:#7a6040; line-height:1.8;" id="dim-info">
+        Base: — × — cm<br>
+        Altura total: — cm<br>
+        Caixas total: —
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div id="bottom-bar">
+  <span>Arraste para girar</span> · <span>Scroll para zoom</span> · <span>Clique num estande para info</span>
+  · <b id="mode-label">MAQUETE COLORIDA</b>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ════════════════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════════════════
+const canvas = document.getElementById('scene');
+const wrap   = document.getElementById('canvas-wrap');
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0d0a04, 0.018);
+
+const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 500);
+camera.position.set(18, 14, 18);
+camera.lookAt(0, 0, 0);
+
+// ── Resize ──
+function resize() {
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resize();
+new ResizeObserver(resize).observe(wrap);
+
+// ── Lights ──
+scene.add(new THREE.AmbientLight(0xfff0d0, 0.5));
+
+const sun = new THREE.DirectionalLight(0xfff0c0, 1.2);
+sun.position.set(15, 25, 10);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.1;
+sun.shadow.camera.far = 200;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -30;
+sun.shadow.camera.right = sun.shadow.camera.top = 30;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xc0d0ff, 0.3);
+fill.position.set(-10, 5, -10);
+scene.add(fill);
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let mode         = 'colorful';
+let camMode      = 'orbit';
+let showBoxes    = false;
+let showSolid    = true;
+let exploding    = false;
+let autoRotate   = false;
+let showCorridor = true;
+let showLabels   = true;
+let explodeT     = 0;
+
+  const params = { layers: 8, bw: 50, bh: 40, bd: 50 };
+
+// orbit state
+const orbit = { theta: Math.PI/4, phi: Math.PI/3.5, r: 38,
+                dragging:false, px:0, py:0 };
+
+// walk state
+const walk = { x: 0, z: -12, angle: 0, keys: {} };
+
+// ════════════════════════════════════════════════════════
+//  MATERIALS
+// ════════════════════════════════════════════════════════
+function makeMat(colorful, realistic) {
+  return {
+    colorful: new THREE.MeshLambertMaterial({ color: colorful }),
+    realistic: new THREE.MeshLambertMaterial({ color: realistic })
+  };
+}
+
+const mats = {
+  pyramid:  makeMat(0xf7c948, 0xc8b464),
+  ground:   makeMat(0xd4a844, 0xc8a84a),
+  nile:     makeMat(0x2a6fa8, 0x1a4a6b),
+  stand1:   makeMat(0xcc3333, 0x8b2020),
+  stand2:   makeMat(0x3366cc, 0x2a4a8b),
+  stand3:   makeMat(0x33aa55, 0x2a5a3a),
+  stand4:   makeMat(0x9933cc, 0x6a2a8b),
+  corridor: makeMat(0x997744, 0x7a5a2a),
+  wall:     makeMat(0xddcc88, 0xb09060),
+  box:      makeMat(0xf0e8d0, 0xd0c8a0),
+  sphinx:   makeMat(0xd4a844, 0xb08830),
+};
+
+function getMat(key) {
+  return mats[key][mode];
+}
+
+// ════════════════════════════════════════════════════════
+//  SCENE GROUPS
+// ════════════════════════════════════════════════════════
+const sceneGroup   = new THREE.Group(); scene.add(sceneGroup);
+const groundGroup  = new THREE.Group(); sceneGroup.add(groundGroup);
+const corridorGroup= new THREE.Group(); sceneGroup.add(corridorGroup);
+const pyramidGroup = new THREE.Group(); sceneGroup.add(pyramidGroup);
+const standGroups  = [new THREE.Group(), new THREE.Group(), new THREE.Group(), new THREE.Group()];
+standGroups.forEach(g => sceneGroup.add(g));
+const labelGroup   = new THREE.Group(); sceneGroup.add(labelGroup);
+
+// ════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════
+function box(w, h, d, mat, x, y, z, rx=0, ry=0, rz=0) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x, y, z);
+  m.rotation.set(rx, ry, rz);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+function cyl(rt, rb, h, mat, x, y, z, seg=32) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+function cone(r, h, mat, x, y, z, seg=32) {
+  const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, seg), mat);
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  return m;
+}
+
+function sphere(r, mat, x, y, z) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), mat);
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  return m;
+}
+
+// ════════════════════════════════════════════════════════
+//  GROUND
+// ════════════════════════════════════════════════════════
+function buildGround() {
+  groundGroup.clear();
+
+  // chão de areia geral
+  const floor = box(80, 0.3, 80, getMat('ground'), 0, -0.15, 0);
+  floor.receiveShadow = true;
+  groundGroup.add(floor);
+
+  // ── Rio Nilo em ANEL circular em volta da pirâmide ──
+  const nileInner = 7.5;   // raio interno do rio
+  const nileOuter = 10.5;  // raio externo do rio
+  const nileGeo = new THREE.RingGeometry(nileInner, nileOuter, 80);
+  const nileMat = new THREE.MeshLambertMaterial({
+    color: mode === 'colorful' ? 0x2a6fa8 : 0x1a4a6b,
+    side: THREE.DoubleSide
+  });
+  const nileRing = new THREE.Mesh(nileGeo, nileMat);
+  nileRing.rotation.x = -Math.PI / 2;
+  nileRing.position.y = 0.02;
+  nileRing.receiveShadow = true;
+  groundGroup.add(nileRing);
+
+  // bordas do rio (areia fina nas margens)
+  const margem1Geo = new THREE.RingGeometry(nileInner - 0.5, nileInner, 80);
+  const margem2Geo = new THREE.RingGeometry(nileOuter, nileOuter + 0.5, 80);
+  const margemMat = new THREE.MeshLambertMaterial({
+    color: mode === 'colorful' ? 0xe8d470 : 0xc8b050,
+    side: THREE.DoubleSide
+  });
+  const m1 = new THREE.Mesh(margem1Geo, margemMat);
+  m1.rotation.x = -Math.PI / 2; m1.position.y = 0.015;
+  const m2 = new THREE.Mesh(margem2Geo, margemMat.clone());
+  m2.rotation.x = -Math.PI / 2; m2.position.y = 0.015;
+  groundGroup.add(m1); groundGroup.add(m2);
+
+  // ilha central (areia dentro do rio)
+  const innerIsland = cyl(nileInner - 0.5, nileInner - 0.5, 0.12,
+    new THREE.MeshLambertMaterial({ color: mode === 'colorful' ? 0xe8d080 : 0xc0a860 }),
+    0, 0.06, 0);
+  groundGroup.add(innerIsland);
+
+  // anel externo (piso da rotatória onde ficam os estandes)
+  const rotaGeo = new THREE.RingGeometry(nileOuter + 0.5, 14, 80);
+  const rotaMat = new THREE.MeshLambertMaterial({
+    color: mode === 'colorful' ? 0xd4c060 : 0xb09040,
+    side: THREE.DoubleSide
+  });
+  const rotaRing = new THREE.Mesh(rotaGeo, rotaMat);
+  rotaRing.rotation.x = -Math.PI / 2;
+  rotaRing.position.y = 0.01;
+  groundGroup.add(rotaRing);
+}
+
+// ════════════════════════════════════════════════════════
+//  PYRAMID
+// ════════════════════════════════════════════════════════
+const pyramidMeshes = [];
+
+function buildPyramid() {
+  pyramidGroup.clear();
+  pyramidMeshes.length = 0;
+
+  const L = params.layers;
+  const bw = params.bw / 100;
+  const bh = params.bh / 100;
+  const bd = params.bd / 100;
+
+  const layerMeshes = [];
+
+  // ── Modo realista: pirâmide cônica de 4 lados ──
+  if (mode === 'realistic' && showSolid && !showBoxes) {
+    const totalH = L * bh;
+    const baseW  = L * bw;
+
+    // pirâmide de 4 lados = cone com 4 segmentos
+    const pyGeo = new THREE.ConeGeometry(baseW * 0.72, totalH, 4);
+    pyGeo.rotateY(Math.PI / 4); // alinhar arestas com os eixos
+
+    // gradiente de cor por vértice (mais escuro na base, mais claro no topo)
+    const posAttr = pyGeo.attributes.position;
+    const colors  = [];
+    for (let vi = 0; vi < posAttr.count; vi++) {
+      const y = posAttr.getY(vi);
+      const t = (y + totalH / 2) / totalH; // 0 = base, 1 = topo
+      const r = 0.62 + t * 0.18;
+      const g2 = 0.52 + t * 0.15;
+      const b2 = 0.30 + t * 0.10;
+      colors.push(r, g2, b2);
+    }
+    pyGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+    const pyMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+    const pyMesh = new THREE.Mesh(pyGeo, pyMat);
+    pyMesh.position.y = totalH / 2;
+    pyMesh.castShadow = true;
+    pyMesh.receiveShadow = true;
+    pyramidGroup.add(pyMesh);
+    pyramidMeshes.push(pyMesh);
+
+    // linhas de pedra (arestas horizontais simulando blocos)
+    for (let layer = 1; layer < L; layer++) {
+      const t = layer / L;
+      const y  = layer * bh;
+      const hw = (L - layer) * bw * 0.72; // meia-largura nessa altura
+      const edgeMat = new THREE.MeshLambertMaterial({ color: 0x7a6030 });
+      // anel horizontal
+      const ringG = new THREE.TorusGeometry(hw * 0.82, 0.018, 4, 4);
+      ringG.rotateY(Math.PI / 4);
+      const ring = new THREE.Mesh(ringG, edgeMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = y;
+      pyramidGroup.add(ring);
+    }
+
+    // aresta no topo (capstone)
+    const capMat = new THREE.MeshLambertMaterial({ color: 0xf0e080 });
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), capMat);
+    cap.position.y = totalH + 0.06;
+    pyramidGroup.add(cap);
+
+    // dummy entry para camadas (sem explodir no realista)
+    pyramidGroup.userData.layerMeshes = [];
+
+  } else {
+    // ── Modo colorido/caixas: blocos empilhados ──
+    for (let layer = 0; layer < L; layer++) {
+      const count = L - layer;
+      const layerGroup = new THREE.Group();
+      const layerMeshList = [];
+      const yBase = layer * bh;
+
+      if (showBoxes) {
+        for (let ix = 0; ix < count; ix++) {
+          for (let iz = 0; iz < count; iz++) {
+            const ox = (ix - (count - 1) / 2) * bw;
+            const oz = (iz - (count - 1) / 2) * bd;
+            const hue = (layer / L) * 0.15;
+            const col = new THREE.Color().setHSL(0.12 + hue, 0.8, 0.55 + layer * 0.04);
+            const bmat = new THREE.MeshLambertMaterial({ color: col });
+            const bx = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.95, bh * 0.95, bd * 0.95), bmat);
+            bx.position.set(ox, yBase + bh / 2, oz);
+            bx.castShadow = true;
+            layerGroup.add(bx);
+            layerMeshList.push(bx);
+          }
+        }
+      }
+
+      if (showSolid) {
+        const hue = (layer / L) * 0.15;
+        const col = new THREE.Color().setHSL(0.12 + hue, 0.85, 0.5 + layer * 0.03);
+        const smat = new THREE.MeshLambertMaterial({ color: col });
+        const sw = count * bw * 0.96;
+        const sd = count * bd * 0.96;
+        const sl = new THREE.Mesh(new THREE.BoxGeometry(sw, bh * 0.95, sd), smat);
+        sl.position.set(0, yBase + bh / 2, 0);
+        sl.castShadow = true;
+        sl.receiveShadow = true;
+        layerGroup.add(sl);
+        layerMeshList.push(sl);
+      }
+
+      layerGroup.userData = { baseY: 0, layer };
+      layerMeshes.push({ group: layerGroup, baseY: 0 });
+      pyramidGroup.add(layerGroup);
+      pyramidMeshes.push(...layerMeshList);
+    }
+
+    pyramidGroup.userData.layerMeshes = layerMeshes;
+  }
+
+  // update dimensions
+  const totalW = L * params.bw;
+  const totalH = L * params.bh;
+  document.getElementById('dim-info').innerHTML =
+    `Base: ${totalW} × ${totalW} cm<br>` +
+    `Altura total: ${totalH} cm<br>` +
+    `Caixas total: ${Array.from({length:L}, (_,i)=>(L-i)**2).reduce((a,b)=>a+b,0)}`;
+}
+
+// ════════════════════════════════════════════════════════
+//  STANDS — mais juntos, todos virados para a pirâmide
+// ════════════════════════════════════════════════════════
+
+const standPositions = [
+  { x:  8,  z: -8,  angle: Math.atan2( 8, -8) }, // NE — Tumba
+  { x:  8,  z:  8,  angle: Math.PI + Math.atan2(-8, -8) }, // SE — Info Pirâmide
+  { x: -8,  z:  8,  angle: Math.atan2(-8,  8) }, // SW — Mesa Explicativa
+  { x: -8,  z: -8,  angle: Math.PI + Math.atan2( 8,  8) }, // NW — Faraó/Esfinge
+];
+
+const standNames = [
+  'Estande 1\nTumba Egípcia',
+  'Estande 2\nPirâmide & Imagens',
+  'Estande 3\nMesa Explicativa',
+  'Estande 4\nFaraó & Esfinge',
+];
+
+function buildStands() {
+  standGroups.forEach(g => g.clear());
+
+  const isReal = mode === 'realistic';
+
+  standPositions.forEach((pos, i) => {
+    const g = standGroups[i];
+    g.position.set(pos.x, 0, pos.z);
+    g.rotation.y = pos.angle;
+
+    // ── Cores realistas por estande ──
+    const tableCol = isReal
+      ? [0x7a5c2a, 0x5a3a1a, 0x6a4a1a, 0x7a5c2a][i]
+      : [0xcc3333, 0x3366cc, 0x33aa55, 0x9933cc][i];
+
+    const tableMatR = new THREE.MeshLambertMaterial({ color: tableCol });
+
+    // Tampo da mesa
+    g.add(box(3.2, 0.12, 1.6, tableMatR, 0, 0.84, 0));
+
+    // Pernas da mesa (madeira)
+    const legMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x5a3a18 : tableCol });
+    [[-1.3,-0.6],[1.3,-0.6],[-1.3,0.6],[1.3,0.6]].forEach(([lx,lz]) => {
+      g.add(box(0.1, 0.85, 0.1, legMat, lx, 0.42, lz));
+    });
+    // travessa horizontal
+    g.add(box(2.6, 0.06, 0.06, legMat, 0, 0.25, -0.55));
+    g.add(box(2.6, 0.06, 0.06, legMat, 0, 0.25,  0.55));
+
+    // ── Painel de fundo (ATRÁS da mesa = z positivo local, pois frente = z negativo) ──
+    const wallCol = isReal ? 0xc8b47a : 0xe8dba0;
+    const panelMat = new THREE.MeshLambertMaterial({ color: wallCol });
+    g.add(box(3.4, 2.8, 0.12, panelMat, 0, 2.28, 1.0));
+
+    // Moldura do painel
+    const frameMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x8b6914 : 0xd4a030 });
+    g.add(box(3.56, 0.1, 0.12, frameMat, 0, 3.74, 1.0));
+    g.add(box(3.56, 0.1, 0.12, frameMat, 0, 0.82, 1.0));
+    g.add(box(0.1, 2.94, 0.12, frameMat, -1.73, 2.28, 1.0));
+    g.add(box(0.1, 2.94, 0.12, frameMat,  1.73, 2.28, 1.0));
+
+    // Imagens no painel
+    const imgCols = isReal
+      ? [0x8b6914, 0x7a5010, 0x5a3800, 0x8b6914]
+      : [0xff6644, 0x44aaff, 0xffdd44, 0xaa44ff];
+    [-1.0, 0, 1.0].forEach((px, pi) => {
+      const im = new THREE.MeshLambertMaterial({ color: imgCols[pi] });
+      g.add(box(0.8, 1.1, 0.04, im, px * 1.05, 2.4, 1.06));
+      const bm = new THREE.MeshLambertMaterial({ color: isReal ? 0xb09040 : 0xffffff });
+      g.add(box(0.86, 1.16, 0.03, bm, px * 1.05, 2.4, 1.05));
+    });
+
+    // ── Props específicos por estande ──
+    if (i === 0) {
+      // TUMBA: sarcófago GRANDE e realista
+      const sarcCol = isReal ? 0xc8a030 : 0xffd700;
+      const sm  = new THREE.MeshLambertMaterial({ color: sarcCol });
+      const sm2 = new THREE.MeshLambertMaterial({ color: isReal ? 0x8b6010 : 0xffaa00 });
+      const stripMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x1a4a6b : 0x0044cc });
+
+      // base do sarcófago (maior)
+      g.add(box(0.75, 0.22, 1.6, sm2, 0, 0.96, 0));
+      // tampa elevada
+      g.add(box(0.7, 0.38, 1.55, sm, 0, 1.13, 0));
+      // cabeça esculpida
+      g.add(sphere(0.22, sm, 0, 1.42, -0.68));
+      // nemes do sarcófago
+      g.add(box(0.42, 0.28, 0.44, sm, 0, 1.56, -0.65));
+      g.add(box(0.14, 0.44, 0.12, sm, -0.22, 1.44, -0.5));
+      g.add(box(0.14, 0.44, 0.12, sm,  0.22, 1.44, -0.5));
+      // faixas hieroglíficas
+      [-0.5, -0.1, 0.3, 0.7].forEach(sz =>
+        g.add(box(0.71, 0.05, 0.05, stripMat, 0, 1.22, sz))
+      );
+      // 4 vasos canópicos MAIORES
+      [[-0.8,-0.45],[-0.8,0.15],[0.8,-0.45],[0.8,0.15]].forEach(([jx,jz]) => {
+        const jm = new THREE.MeshLambertMaterial({ color: isReal ? 0xc8a860 : 0xffd700 });
+        g.add(cyl(0.09, 0.12, 0.34, jm, jx, 1.03, jz, 10));
+        g.add(sphere(0.1, jm, jx, 1.22, jz));
+      });
+      // pedestais sob os vasos
+      [[-0.8,-0.45],[-0.8,0.15],[0.8,-0.45],[0.8,0.15]].forEach(([jx,jz]) => {
+        const pm2 = new THREE.MeshLambertMaterial({ color: isReal ? 0x7a5a20 : 0xcc9900 });
+        g.add(box(0.22, 0.06, 0.22, pm2, jx, 0.87, jz));
+      });
+    }
+
+    if (i === 1) {
+      // INFO PIRÂMIDE: mini pirâmide + papiro
+      const pCol = isReal ? 0xd4b870 : 0xffdd00;
+      const pm = new THREE.MeshLambertMaterial({ color: pCol });
+      const mini = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.55, 4), pm);
+      mini.position.set(-0.6, 1.08, 0.1);
+      mini.rotation.y = Math.PI/4;
+      mini.castShadow = true;
+      g.add(mini);
+      // "papiro" (rolo)
+      const papyMat = new THREE.MeshLambertMaterial({ color: isReal ? 0xe8d0a0 : 0xfffacd });
+      g.add(cyl(0.09, 0.09, 0.9, papyMat, 0.5, 1.06, 0.1, 12));
+      g.add(cyl(0.1, 0.1, 0.06, papyMat, 0.5, 0.65, 0.1, 12));
+      g.add(cyl(0.1, 0.1, 0.06, papyMat, 0.5, 1.47, 0.1, 12));
+      // olho de Hórus
+      const eyeMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x1a3a6b : 0x0055ff });
+      g.add(sphere(0.09, eyeMat, 0.1, 1.1, 0.1));
+    }
+
+    if (i === 2) {
+      // MESA DE COMIDAS
+      const potMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x7a4020 : 0xcc6633 });
+      const fruMat = new THREE.MeshLambertMaterial({ color: isReal ? 0xc07030 : 0xffaa00 });
+      const brdMat = new THREE.MeshLambertMaterial({ color: isReal ? 0xd4c090 : 0xfff0c0 });
+      // pão achatado
+      g.add(box(0.5, 0.08, 0.5, brdMat, -0.8, 0.93, 0.1));
+      // vasos de barro
+      [0, 0.7].forEach(vx => {
+        g.add(cyl(0.1, 0.14, 0.28, potMat, vx, 1.0, 0.1, 10));
+        g.add(cyl(0.07, 0.1, 0.06, potMat, vx, 1.16, 0.1, 10));
+      });
+      // frutas/uvas
+      [-0.8, -0.5, -0.2].forEach((fx,fi) => {
+        const fc = new THREE.MeshLambertMaterial({ color: [0xaa3366, 0xdd6622, 0x557722][fi] });
+        g.add(sphere(0.08, fc, fx + 1.5, 0.96, 0.1 + (fi%2)*0.12 - 0.06));
+      });
+      // cesto
+      const bskMat = new THREE.MeshLambertMaterial({ color: isReal ? 0xb08030 : 0xd4a030 });
+      g.add(cyl(0.2, 0.24, 0.18, bskMat, -0.3, 0.97, -0.35, 12));
+    }
+
+    if (i === 3) {
+      // FARAÓ / ESFINGE — estátua GRANDE e detalhada
+      const stoneCol = isReal ? 0xc8a84a : 0xffd700;
+      const sm = new THREE.MeshLambertMaterial({ color: stoneCol });
+      const darkMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x1a0800 : 0x220055 });
+      const goldAcc = new THREE.MeshLambertMaterial({ color: isReal ? 0xd4a820 : 0xffee00 });
+      const cobraMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x8b2020 : 0xff2222 });
+
+      // base / trono largo
+      g.add(box(1.1, 0.22, 0.9, sm, 0, 0.96, 0.1));
+      // assento do trono
+      g.add(box(0.9, 0.55, 0.75, sm, 0, 1.24, 0.15));
+      // encosto do trono
+      g.add(box(0.9, 1.1, 0.12, sm, 0, 1.8, 0.5));
+      // braços do trono
+      g.add(box(0.1, 0.35, 0.65, sm, -0.4, 1.35, 0.18));
+      g.add(box(0.1, 0.35, 0.65, sm,  0.4, 1.35, 0.18));
+      // torso
+      g.add(box(0.65, 0.7, 0.55, sm, 0, 1.66, 0.1));
+      // collar (colar usekh)
+      g.add(box(0.72, 0.14, 0.52, goldAcc, 0, 1.95, 0.08));
+      // nemes (toucado)
+      g.add(box(0.58, 0.28, 0.62, sm, 0, 2.26, 0.06));
+      g.add(box(0.18, 0.62, 0.14, sm, -0.28, 2.1, 0.3));
+      g.add(box(0.18, 0.62, 0.14, sm,  0.28, 2.1, 0.3));
+      // rosto (maior)
+      g.add(sphere(0.26, sm, 0, 2.5, 0.08));
+      // olhos alongados
+      g.add(box(0.09, 0.04, 0.04, darkMat, -0.1, 2.53, -0.15));
+      g.add(box(0.09, 0.04, 0.04, darkMat,  0.1, 2.53, -0.15));
+      // barba postiça trançada
+      g.add(box(0.11, 0.38, 0.1, sm, 0, 2.21, -0.1));
+      g.add(box(0.09, 0.06, 0.09, goldAcc, 0, 2.06, -0.1));
+      // uraeus (cobra real)
+      g.add(sphere(0.06, cobraMat, 0, 2.64, -0.1));
+      g.add(box(0.04, 0.14, 0.04, cobraMat, 0, 2.74, -0.06));
+      // cajado heka
+      g.add(box(0.045, 1.05, 0.045, goldAcc, 0.35, 1.6, -0.08));
+      g.add(box(0.1, 0.045, 0.045, goldAcc, 0.3, 2.1, -0.08));
+      // mangual flagelo
+      g.add(box(0.04, 0.7, 0.04, goldAcc, -0.32, 1.65, -0.05));
+      [0.1, 0.28, 0.46].forEach(fy => {
+        g.add(box(0.22, 0.04, 0.04, goldAcc, -0.42, 1.65 - fy, -0.05));
+      });
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  PALMEIRAS (coqueiros)
+// ════════════════════════════════════════════════════════
+const palmGroup = new THREE.Group(); sceneGroup.add(palmGroup);
+
+function buildPalms() {
+  palmGroup.clear();
+
+  const isReal = mode === 'realistic';
+
+  // Posições das palmeiras ao redor da rotatória
+  const palmPositions = [
+    { x: -13, z: -13 }, { x: 13, z: -13 },
+    { x: -16, z: 0   }, { x: 16, z: 0   },
+    { x: -13, z:  13 }, { x: 13, z:  13 },
+    { x: -5,  z: -16 }, { x:  5, z: -16 },
+    { x:  0,  z: -18 },
+  ];
+
+  palmPositions.forEach(({ x, z }, pi) => {
+    const g = new THREE.Group();
+    g.position.set(x, 0, z);
+    // leve inclinação aleatória mas determinística
+    const lean = ((pi * 37 + 13) % 7 - 3) * 0.04;
+    g.rotation.z = lean;
+    g.rotation.x = ((pi * 53 + 7) % 5 - 2) * 0.03;
+
+    const trunkCol = isReal ? 0x8b5e2a : 0xaa7733;
+    const trunkMat = new THREE.MeshLambertMaterial({ color: trunkCol });
+
+    // tronco segmentado (cyl com ligeiro afunilamento)
+    const trunkH = 4.5 + (pi % 3) * 0.6;
+    const segs = 6;
+    for (let s = 0; s < segs; s++) {
+      const rt = 0.18 - s * 0.018;
+      const rb = 0.22 - s * 0.018;
+      const sy = (s + 0.5) * (trunkH / segs);
+      // anel de textura (mais escuro)
+      const ringCol = isReal ? 0x6a4418 : 0x996622;
+      const ringMat = new THREE.MeshLambertMaterial({ color: ringCol });
+      g.add(cyl(rt + 0.01, rb + 0.01, 0.08, ringMat, 0, sy - trunkH/(segs*2), 0, 10));
+      g.add(cyl(rt, rb, trunkH/segs - 0.08, trunkMat, 0, sy, 0, 10));
+    }
+
+    // copa de folhas (6–8 folhas irradiando)
+    const leafCount = 7;
+    const leafCol = isReal ? 0x3a6b1a : 0x44aa22;
+    for (let li = 0; li < leafCount; li++) {
+      const angle = (li / leafCount) * Math.PI * 2;
+      const tiltOut = 0.45 + (li % 2) * 0.1;
+      const leafLen = 2.2 + (li % 3) * 0.3;
+
+      const leafMat = new THREE.MeshLambertMaterial({
+        color: isReal
+          ? new THREE.Color(0.18 + (li%3)*0.03, 0.38 + (li%2)*0.06, 0.08)
+          : new THREE.Color(0.2 + (li%3)*0.05, 0.6 + (li%2)*0.05, 0.1),
+        side: THREE.DoubleSide
+      });
+
+      // cada folha: série de losangos ao longo de uma haste curva
+      const numLeaflets = 6;
+      for (let fl = 0; fl < numLeaflets; fl++) {
+        const t2 = (fl + 0.5) / numLeaflets;
+        // posição ao longo da haste curvada
+        const lx = Math.sin(angle) * t2 * leafLen * tiltOut;
+        const ly = trunkH + Math.cos(t2 * 0.7) * leafLen * 0.7 - t2 * leafLen * 0.5;
+        const lz = Math.cos(angle) * t2 * leafLen * tiltOut;
+        const fw = (0.22 - t2 * 0.16);
+        const fh = 0.06;
+        const fd = (0.35 - t2 * 0.2);
+        const leaf = new THREE.Mesh(new THREE.BoxGeometry(fw, fh, fd), leafMat);
+        leaf.position.set(lx, ly, lz);
+        leaf.rotation.y = angle;
+        leaf.castShadow = true;
+        g.add(leaf);
+      }
+
+      // haste central
+      const stemMat = new THREE.MeshLambertMaterial({ color: isReal ? 0x4a6018 : 0x558822 });
+      const stemLen = leafLen * 0.9;
+      const stemMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.025, 0.04, stemLen, 6),
+        stemMat
+      );
+      stemMesh.position.set(
+        Math.sin(angle) * stemLen * 0.35 * tiltOut,
+        trunkH + stemLen * 0.3,
+        Math.cos(angle) * stemLen * 0.35 * tiltOut
+      );
+      stemMesh.rotation.z =  Math.cos(angle) * tiltOut;
+      stemMesh.rotation.x = -Math.sin(angle) * tiltOut;
+      stemMesh.castShadow = true;
+      g.add(stemMesh);
+    }
+
+    // cocos (pequenas esferas na base das folhas)
+    if (isReal) {
+      const cocoMat = new THREE.MeshLambertMaterial({ color: 0x6b4010 });
+      for (let c = 0; c < 4; c++) {
+        const ca = (c / 4) * Math.PI * 2;
+        g.add(sphere(0.14, cocoMat, Math.sin(ca)*0.3, trunkH + 0.05, Math.cos(ca)*0.3));
+      }
+    }
+
+    g.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    palmGroup.add(g);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  CORRIDOR
+// ════════════════════════════════════════════════════════
+function buildCorridor() {
+  corridorGroup.clear();
+  if (!showCorridor) return;
+
+  const wmat = getMat('corridor');
+  const wallMat = getMat('wall');
+
+  // Entrada e saída ficam lado a lado no mesmo lado (z positivo = sul)
+  // Entrada: deslocada para a esquerda (x = -2)
+  // Saída:   deslocada para a direita  (x = +2)
+  const cLen = 8;
+  const cW   = 2.6;
+  const cH   = 3;
+  const cz   = 16;   // centro em Z (sul da rotatória)
+  const entX = -2.2; // entrada à esquerda
+  const extX =  2.2; // saída à direita
+
+  // ── ENTRADA ──
+  corridorGroup.add(box(cW, 0.1, cLen, wmat, entX, 0.05, cz));
+  corridorGroup.add(box(0.15, cH, cLen, wallMat, entX - cW/2, cH/2, cz));  // parede esq
+  // parede divisória entre entrada e saída (compartilhada)
+  corridorGroup.add(box(0.15, cH, cLen, wallMat, entX + cW/2, cH/2, cz));  // parede dir (divisória)
+  corridorGroup.add(box(cW + 0.15, 0.2, cLen, wallMat, entX, cH, cz));     // teto
+
+  // ── SAÍDA ──
+  corridorGroup.add(box(cW, 0.1, cLen, wmat, extX, 0.05, cz));
+  corridorGroup.add(box(0.15, cH, cLen, wallMat, extX - cW/2, cH/2, cz));  // parede esq (faltava!)
+  corridorGroup.add(box(0.15, cH, cLen, wallMat, extX + cW/2, cH/2, cz));  // parede dir
+  corridorGroup.add(box(cW + 0.15, 0.2, cLen, wallMat, extX, cH, cz));     // teto
+
+  // Decoração egípcia nas paredes
+  if (mode === 'colorful') {
+    const stripeColors = [0xd4380d, 0xc9a84c, 0x1a6b3a, 0x1a3a6b];
+    stripeColors.forEach((col, si) => {
+      const sm = new THREE.MeshLambertMaterial({ color: col });
+      const sy = 0.3 + si * 0.5;
+      // paredes externas
+      corridorGroup.add(box(0.05, 0.2, cLen * 0.85, sm, entX - cW/2 + 0.1, sy, cz));
+      corridorGroup.add(box(0.05, 0.2, cLen * 0.85, sm, extX + cW/2 - 0.1, sy, cz));
+      // parede divisória (ambos os lados)
+      corridorGroup.add(box(0.05, 0.2, cLen * 0.85, sm, entX + cW/2 - 0.1, sy, cz));
+    });
+    // painéis de hieróglifos
+    for (let hi = 0; hi < 4; hi++) {
+      const hm = new THREE.MeshLambertMaterial({ color: stripeColors[hi % 4] });
+      corridorGroup.add(box(0.05, 0.65, 0.45, hm, entX - cW/2 + 0.1, 1.4, cz - 2 + hi * 1.4));
+      corridorGroup.add(box(0.05, 0.65, 0.45, hm, extX + cW/2 - 0.1, 1.4, cz - 2 + hi * 1.4));
+    }
+  }
+
+  // Arco de entrada (lado de fora, z mais ao sul)
+  const archMat = new THREE.MeshLambertMaterial({ color: mode==='colorful' ? 0xd4a030 : 0x9a7020 });
+  const outerZ = cz + cLen/2;
+
+  // verga + pilares do arco de entrada
+  corridorGroup.add(box(cW + 0.4, 0.4, 0.3, archMat, entX, cH + 0.1, outerZ));
+  corridorGroup.add(box(0.3, cH + 0.4, 0.3, archMat, entX - cW/2 - 0.1, cH/2, outerZ));
+  corridorGroup.add(box(0.3, cH + 0.4, 0.3, archMat, entX + cW/2 + 0.1, cH/2, outerZ));
+
+  // verga + pilares do arco de saída
+  corridorGroup.add(box(cW + 0.4, 0.4, 0.3, archMat, extX, cH + 0.1, outerZ));
+  corridorGroup.add(box(0.3, cH + 0.4, 0.3, archMat, extX - cW/2 - 0.1, cH/2, outerZ));
+  corridorGroup.add(box(0.3, cH + 0.4, 0.3, archMat, extX + cW/2 + 0.1, cH/2, outerZ));
+
+  // Placa "ENTRADA" e "SAÍDA" acima dos arcos
+  const signMatEnt = new THREE.MeshLambertMaterial({ color: mode==='colorful' ? 0x33aa55 : 0x2a5a30 });
+  const signMatExt = new THREE.MeshLambertMaterial({ color: mode==='colorful' ? 0xcc3333 : 0x7a2020 });
+  corridorGroup.add(box(cW, 0.4, 0.2, signMatEnt, entX, cH + 0.7, outerZ));
+  corridorGroup.add(box(cW, 0.4, 0.2, signMatExt, extX, cH + 0.7, outerZ));
+
+  // Obeliscos apenas nas extremidades externas
+  const obMat = new THREE.MeshLambertMaterial({ color: mode==='colorful' ? 0xffcc00 : 0xc8a030 });
+  [entX - cW/2 - 0.6, extX + cW/2 + 0.6].forEach(ox => {
+    corridorGroup.add(box(0.4, 5, 0.4, obMat, ox, 2.5, outerZ));
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.8, 4), obMat);
+    tip.position.set(ox, 5.4, outerZ);
+    tip.rotation.y = Math.PI/4;
+    corridorGroup.add(tip);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  LABELS (canvas sprites)
+// ════════════════════════════════════════════════════════
+const labelSprites = [];
+
+function makeLabel(text, x, y, z) {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 64;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#0d0a04cc';
+  ctx.roundRect(4, 4, 248, 56, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#c9a84c';
+  ctx.lineWidth = 2;
+  ctx.roundRect(4, 4, 248, 56, 6);
+  ctx.stroke();
+  ctx.fillStyle = '#f0d080';
+  ctx.font = 'bold 18px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  text.split('\n').forEach((line, i) => {
+    ctx.fillText(line, 128, 22 + i * 22);
+  });
+  const tex = new THREE.CanvasTexture(cv);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+  const sp = new THREE.Sprite(mat);
+  sp.scale.set(3, 0.75, 1);
+  sp.position.set(x, y, z);
+  return sp;
+}
+
+function buildLabels() {
+  labelGroup.clear();
+  labelSprites.length = 0;
+  if (!showLabels) return;
+
+  const labels = [
+    ['🔺 Pirâmide\nCentral', 0, 5.5, 0],
+    ['⚰ Tumba\nEstande 1',  8, 4, -8],
+    ['📜 Info\nEstande 2',   8, 4,  8],
+    ['🍽 Mesa\nEstande 3',  -8, 4,  8],
+    ['👑 Faraó\nEstande 4', -8, 4, -8],
+    ['🏛 Entrada', -2.2, 5, 20],
+    ['🚪 Saída',    2.2, 5, 20],
+  ];
+
+  labels.forEach(([text, x, y, z]) => {
+    const sp = makeLabel(text, x, y, z);
+    labelGroup.add(sp);
+    labelSprites.push(sp);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  BUILD ALL
+// ════════════════════════════════════════════════════════
+function buildAll() {
+  buildGround();
+  buildPyramid();
+  buildStands();
+  buildPalms();
+  buildCorridor();
+  buildLabels();
+  updateSliderDisplays();
+}
+
+buildAll();
+
+// ════════════════════════════════════════════════════════
+//  ORBIT CONTROLS
+// ════════════════════════════════════════════════════════
+canvas.addEventListener('mousedown', e => {
+  if (camMode !== 'orbit') return;
+  orbit.dragging = true;
+  orbit.px = e.clientX; orbit.py = e.clientY;
+});
+canvas.addEventListener('mousemove', e => {
+  if (!orbit.dragging || camMode !== 'orbit') return;
+  const dx = e.clientX - orbit.px;
+  const dy = e.clientY - orbit.py;
+  orbit.theta -= dx * 0.008;
+  orbit.phi   = Math.max(0.15, Math.min(Math.PI/2 - 0.05, orbit.phi - dy * 0.006));
+  orbit.px = e.clientX; orbit.py = e.clientY;
+});
+canvas.addEventListener('mouseup', () => { orbit.dragging = false; });
+canvas.addEventListener('mouseleave', () => { orbit.dragging = false; });
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  orbit.r = Math.max(3, Math.min(100, orbit.r + e.deltaY * 0.06));
+}, { passive: false });
+
+// Touch
+let lastTouch = null;
+canvas.addEventListener('touchstart', e => {
+  if (camMode !== 'orbit') return;
+  lastTouch = e.touches[0];
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  if (camMode !== 'orbit' || !lastTouch) return;
+  const t = e.touches[0];
+  orbit.theta -= (t.clientX - lastTouch.clientX) * 0.008;
+  orbit.phi   = Math.max(0.15, Math.min(Math.PI/2 - 0.05, orbit.phi - (t.clientY - lastTouch.clientY) * 0.006));
+  lastTouch = t;
+}, { passive: true });
+
+// ════════════════════════════════════════════════════════
+//  WALK CONTROLS
+// ════════════════════════════════════════════════════════
+window.addEventListener('keydown', e => { walk.keys[e.code] = true; });
+window.addEventListener('keyup',   e => { walk.keys[e.code] = false; });
+
+// ════════════════════════════════════════════════════════
+//  RAYCASTING (click labels)
+// ════════════════════════════════════════════════════════
+const raycaster = new THREE.Raycaster();
+const mouse2    = new THREE.Vector2();
+const tooltip   = document.getElementById('tooltip');
+
+const standInfo = [
+  'TUMBA EGÍPCIA\n\nRepresenta o mundo dos mortos. Contém sarcófago e vasos canópicos.',
+  'PIRÂMIDE\n\nImagens e curiosidades sobre a construção das pirâmides no Egito Antigo.',
+  'MESA EXPLICATIVA\n\nComidas típicas egípcias e materiais de apoio sobre o 1º estande.',
+  'FARAÓ & ESFINGE\n\nEstátua do faraó e réplica em miniatura da Grande Esfinge de Gizé.',
+];
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse2.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse2.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse2, camera);
+
+  const standObjects = standGroups.flatMap(g => {
+    const arr = [];
+    g.traverse(c => { if (c.isMesh) arr.push(c); });
+    return arr;
+  });
+
+  const hits = raycaster.intersectObjects(standObjects, true);
+  if (hits.length > 0) {
+    let obj = hits[0].object;
+    while (obj.parent && !standGroups.includes(obj.parent) && obj.parent !== sceneGroup) {
+      obj = obj.parent;
+    }
+    const idx = standGroups.indexOf(obj.parent);
+    if (idx >= 0) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX - wrap.getBoundingClientRect().left + 12) + 'px';
+      tooltip.style.top  = (e.clientY - wrap.getBoundingClientRect().top  - 20) + 'px';
+      tooltip.textContent = standInfo[idx];
+      setTimeout(() => { tooltip.style.display = 'none'; }, 3500);
+    }
+  }
+});
+
+// ════════════════════════════════════════════════════════
+//  ANIMATION LOOP
+// ════════════════════════════════════════════════════════
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.016;
+
+  // auto rotate
+  if (autoRotate && camMode === 'orbit') orbit.theta += 0.004;
+
+  // explode animation
+  if (exploding) {
+    explodeT = Math.min(1, explodeT + 0.025);
+  } else {
+    explodeT = Math.max(0, explodeT - 0.03);
+  }
+
+  // apply explode to pyramid layers
+  if (pyramidGroup.userData.layerMeshes) {
+    pyramidGroup.userData.layerMeshes.forEach(({ group, baseY }, i) => {
+      group.position.y = explodeT * i * params.bh / 100 * 2;
+    });
+  }
+
+  // nile shimmer (anel circular)
+  const nileRingMesh = groundGroup.children[1];
+  if (nileRingMesh && nileRingMesh.material) {
+    if (mode === 'colorful') {
+      nileRingMesh.material.color.setHSL(0.58, 0.8, 0.28 + Math.sin(t * 1.2) * 0.06);
+    } else {
+      nileRingMesh.material.color.setHSL(0.58, 0.6, 0.18 + Math.sin(t * 1.2) * 0.04);
+    }
+  }
+
+  // camera
+  if (camMode === 'orbit') {
+    const sinP = Math.sin(orbit.phi);
+    const cosP = Math.cos(orbit.phi);
+    camera.position.set(
+      orbit.r * Math.sin(orbit.theta) * sinP,
+      orbit.r * cosP,
+      orbit.r * Math.cos(orbit.theta) * sinP
+    );
+    camera.lookAt(0, 2, 0);
+
+  } else if (camMode === 'top') {
+    camera.position.set(0, 35, 0.01);
+    camera.lookAt(0, 0, 0);
+
+  } else if (camMode === 'walk') {
+    const spd = 0.08;
+    if (walk.keys['ArrowUp']    || walk.keys['KeyW']) { walk.z -= Math.cos(walk.angle)*spd; walk.x -= Math.sin(walk.angle)*spd; }
+    if (walk.keys['ArrowDown']  || walk.keys['KeyS']) { walk.z += Math.cos(walk.angle)*spd; walk.x += Math.sin(walk.angle)*spd; }
+    if (walk.keys['ArrowLeft']  || walk.keys['KeyA']) walk.angle += 0.025;
+    if (walk.keys['ArrowRight'] || walk.keys['KeyD']) walk.angle -= 0.025;
+
+    // clamp
+    walk.x = Math.max(-25, Math.min(25, walk.x));
+    walk.z = Math.max(-25, Math.min(25, walk.z));
+
+    camera.position.set(walk.x, 1.7, walk.z);
+    camera.lookAt(walk.x - Math.sin(walk.angle)*5, 1.7, walk.z - Math.cos(walk.angle)*5);
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// ════════════════════════════════════════════════════════
+//  UI FUNCTIONS
+// ════════════════════════════════════════════════════════
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i === (m==='colorful'?0:1)));
+  document.getElementById('mode-label').textContent = m === 'colorful' ? 'MAQUETE COLORIDA' : 'VERSÃO REALISTA';
+
+  // fog
+  scene.fog.color.setHex(m === 'colorful' ? 0x0d0a04 : 0x2a1f0a);
+
+  buildAll();
+}
+
+function setCam(c) {
+  camMode = c;
+  document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('cam-'+c).classList.add('active');
+
+  if (c === 'walk') {
+    walk.x = 0; walk.z = -12; walk.angle = 0;
+    const hint = document.getElementById('bottom-bar');
+    hint.innerHTML = '<span>W/A/S/D ou Setas para mover</span> · <b id="mode-label">'+
+      (mode==='colorful'?'MAQUETE COLORIDA':'VERSÃO REALISTA')+'</b>';
+  } else {
+    document.getElementById('bottom-bar').innerHTML =
+      '<span>Arraste para girar</span> · <span>Scroll para zoom</span> · <span>Clique num estande para info</span>' +
+      ' · <b id="mode-label">'+(mode==='colorful'?'MAQUETE COLORIDA':'VERSÃO REALISTA')+'</b>';
+  }
+}
+
+function toggleBoxes() {
+  showBoxes = !showBoxes;
+  document.getElementById('btn-boxes').classList.toggle('active', showBoxes);
+  buildPyramid();
+}
+
+function toggleSolid() {
+  showSolid = !showSolid;
+  document.getElementById('btn-solid').classList.toggle('active', showSolid);
+  buildPyramid();
+}
+
+function toggleExplode() {
+  exploding = !exploding;
+  document.getElementById('btn-explode').classList.toggle('active', exploding);
+}
+
+function toggleAutoRotate() {
+  autoRotate = !autoRotate;
+  document.getElementById('btn-rotate').classList.toggle('active', autoRotate);
+}
+
+function resetCamera() {
+  orbit.theta = Math.PI/4;
+  orbit.phi   = Math.PI/3.5;
+  orbit.r     = 28;
+  setCam('orbit');
+}
+
+function toggleCorridor() {
+  showCorridor = !showCorridor;
+  document.getElementById('btn-corridor').classList.toggle('active', showCorridor);
+  buildCorridor();
+}
+
+function toggleLabels() {
+  showLabels = !showLabels;
+  document.getElementById('btn-labels').classList.toggle('active', showLabels);
+  buildLabels();
+}
+
+function updatePyramid() {
+  params.layers = +document.getElementById('sl-layers').value;
+  params.bw     = +document.getElementById('sl-bw').value;
+  params.bh     = +document.getElementById('sl-bh').value;
+  params.bd     = +document.getElementById('sl-bd').value;
+  updateSliderDisplays();
+  buildPyramid();
+}
+
+function updateSliderDisplays() {
+  document.getElementById('val-layers').textContent = params.layers;
+  document.getElementById('val-bw').textContent     = params.bw;
+  document.getElementById('val-bh').textContent     = params.bh;
+  document.getElementById('val-bd').textContent     = params.bd;
+}
+</script>
+</body>
+</html>
